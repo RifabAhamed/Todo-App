@@ -14,4 +14,6 @@ app.get("/v1/platform/health-check", (req, res) => {
   res.status(200).json({ status: "Server is up and running" });
 });
 
+
+app.use("/v1/")
 export default app;
