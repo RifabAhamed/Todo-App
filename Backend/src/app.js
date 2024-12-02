@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import HomeRoutes from "../src/routes/HomeRoutes.js"
 
 const app = express();
 
@@ -15,5 +16,5 @@ app.get("/v1/platform/health-check", (req, res) => {
 });
 
 
-app.use("/v1/")
+app.use("/home",HomeRoutes);
 export default app;
