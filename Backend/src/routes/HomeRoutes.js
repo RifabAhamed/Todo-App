@@ -6,6 +6,8 @@ const homeController = new HomeController();
 
 
 router.post("/create-action", homeController.createActionController);
-router.post("/get-all-actions", homeController.getAllActionsController);
+router.get("/get-all-actions", homeController.getAllActionsController);
+router.put("/update-action", homeController.updateActionController);
+router.delete("/delete-action", homeController.deleteActionController);
 
 export default router;

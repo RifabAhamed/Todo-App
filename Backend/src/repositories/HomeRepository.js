@@ -6,7 +6,6 @@ class HomeRepository {
       // Check for existing entity
       const existingEntity = await ActionModel.findOne({
         actionTitle: dto.actionTitle,
-        isActive: true,
       });
 
       if (existingEntity) {
@@ -27,65 +26,26 @@ class HomeRepository {
         data: createdEntity,
       };
     } catch (error) {
-      console.error("Error creating action:", error);
+      console.error("Error performing action operation (create):", error, dto);
       return {
-        success: false, // Corrected success flag
-        message: "Error creating action.",
+        success: false,
+        message: "Error performing action operation.",
         data: null,
       };
     }
   }
 
-  async getAllActionsRepository(dto) {
+  async getAllActionsRepository() {
     try {
-      const skip = (dto.page - 1) * dto.limit;
-  
-      let sortField = dto.sort || "createdAt";
-      const sortOrder = dto.order || "asc";
-  
-      const allowedSortFields = ["createdAt"];
-      if (!allowedSortFields.includes(sortField)) {
-        return {
-          success: false,
-          message: "Invalid sort.",
-          data: null,
-        };
-      }
-  
-      const query = {};
-  
-      // if (dto.search) {
-      //   query.fullName = { $regex: dto.search, $options: "i" };
-      // }
-  
-      // if (dto.workspaceId) {
-      //   query.workspaceId = dto.workspaceId;
-      // }
-  
-      const allActions = ActionModel.find(query);
-  
-      // Apply sorting, skipping, and limiting
-      allActions
-        .sort({ [sortField]: sortOrder })
-        .skip(skip)
-        .limit(dto.limit);
-  
-      const actions = await allActions.exec();
-      const totalActions = await allActions.countDocuments(query);
-  
-      console.log("Fetched Dazhs:", actions); // Check what is fetched
-  
+      const actions = await ActionModel.find().exec();
+
       return {
         success: true,
-        message: "Dazhboard fetched.",
-        data: {
-          actions: actions,
-          totalPages: Math.ceil(totalActions / dto.limit),
-          currentPage: dto.page,
-        },
+        message: "Actions fetched successfully.",
+        data: actions,
       };
     } catch (error) {
-      console.error("Error fetching Dazhboards:", error);
+      console.error("Error performing action operation (fetch all):", error);
       return {
         success: false,
         message: error.message,
@@ -93,7 +53,74 @@ class HomeRepository {
       };
     }
   }
+
+  async updateActionRepository(dto) {
+    try {
+      // Find the action by its ID and update it
+      const updatedAction = await ActionModel.findOneAndUpdate(
+        { _id: dto.id }, // Corrected to use _id instead of id
+        {
+          $set: {
+            actionTitle: dto.actionTitle || undefined, // Only update if provided
+            actionDescription: dto.actionDescription || undefined,
+            actionStatus: dto.actionStatus || undefined,
+          },
+        },
+        { new: true } // Return the updated document
+      );
   
+      if (!updatedAction) {
+        return {
+          success: false,
+          message: "Action not found or is inactive.",
+          data: null,
+        };
+      }
+  
+      return {
+        success: true,
+        message: "Action updated successfully.",
+        data: updatedAction,
+      };
+    } catch (error) {
+      console.error("Error performing action operation (update):", error, dto);
+      return {
+        success: false,
+        message: "Error performing action operation.",
+        data: null,
+      };
+    }
+  }
+  
+
+  async deleteActionRepository(id) {
+    try {
+      // Attempt to delete the action based on the ID
+      const deletedAction = await ActionModel.findByIdAndDelete(id);
+
+      // Check if the action was found and deleted
+      if (!deletedAction) {
+        return {
+          success: false,
+          message: "Action not found or already deleted.",
+          data: null,
+        };
+      }
+
+      return {
+        success: true,
+        message: "Action deleted successfully.",
+        data: deletedAction,
+      };
+    } catch (error) {
+      console.error("Error performing action operation (delete):", error, id);
+      return {
+        success: false,
+        message: "Error performing action operation.",
+        data: null,
+      };
+    }
+  }
 }
 
 export default HomeRepository;
