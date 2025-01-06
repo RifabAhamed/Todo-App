@@ -1,10 +1,9 @@
 
-const ActionCard = (title, description, actionStatus) => {
+const ActionCard = (title, description) => {
   return (
     <div>
         <div>{title}</div>
         <div>{description}</div>
-        <div>{actionStatus}</div>
     </div>
   )
 }

@@ -1,6 +1,8 @@
 import HomeService from "../../src/services/Homeservice.js";
 import { successResponse, errorResponse } from "../utils/responseUtil.js";
+import mongoose from "mongoose";
 
+const { isValidObjectId } = mongoose; // Importing isValidObjectId
 const homeService = new HomeService();
 
 class HomeController {
@@ -9,13 +11,15 @@ class HomeController {
     try {
       const dto = req.body;
       const response = await homeService.createActionService(dto);
+
       if (response && response.success) {
         return successResponse(res, response.message, response.data, 201); // 201 Created
       } else {
         return errorResponse(res, response.message, 500); // Internal Server Error
       }
     } catch (error) {
-      next(error); // Pass error to the next middleware (error handler)
+      console.error("Error in createActionController:", error);
+      next(error); // Pass error to middleware
     }
   }
 
@@ -23,55 +27,65 @@ class HomeController {
   async getAllActionsController(req, res, next) {
     try {
       const response = await homeService.getAllActionsService();
+
       if (response.success) {
         return successResponse(res, response.message, response.data, 200); // 200 OK
       } else {
         return errorResponse(res, response.message, 500); // Internal Server Error
       }
     } catch (error) {
-      next(error); // Pass error to the next middleware (error handler)
+      console.error("Error in getAllActionsController:", error);
+      next(error); // Pass error to middleware
     }
   }
 
   // Update Action
   async updateActionController(req, res, next) {
     try {
-      const dto = req.body;
-
-      // Validate the request body
-      if (!dto.id) {
-        return errorResponse(res, "Missing required field id", 400); // 400 Bad Request
+      const { id } = req.body; // Extract ID from the URL
+      if (!isValidObjectId(id)) {
+        return errorResponse(res, "Invalid action ID", 400); // Bad Request
       }
 
-      const response = await homeService.updateActionService(dto);
-      if (response && response.success) {
+      const dto = req.body; // Extract data to update from the request body
+      console.log("Updating action with ID:", id); // Debugging log
+      console.log("Received data:", dto); // Debugging log
+
+      // Call the service to update action
+      const response = await homeService.updateActionService(id, dto);
+
+      if (response.success) {
         return successResponse(res, response.message, response.data, 200); // 200 OK
       } else {
-        return errorResponse(res, response?.message || 'Error occurred', 500); // Internal Server Error
+        return errorResponse(res, response.message, 500); // Internal Server Error
       }
     } catch (error) {
-      next(error); // Pass error to the next middleware (error handler)
+      console.error("Error in updateActionController:", error);
+      next(error); // Pass error to middleware
     }
   }
 
   // Delete Action
-  async deleteActionController(req, res, next) {
+  async deleteActionController(req, res) {
     try {
-      const dto = req.body; // Assuming the ID to delete is passed in the request body
-
-      // Validate the request body
-      if (!dto.id) {
-        return errorResponse(res, "Missing required field: id", 400); // 400 Bad Request
+     const { id } = req.query;
+      if (!isValidObjectId(id)) {
+        return errorResponse(res, "Invalid action ID", 400); // Bad Request
       }
 
-      const response = await homeService.deleteActionService(dto);
-      if (response && response.success) {
-        return successResponse(res, response.message, response.data, 200); // 200 OK
+      console.log("Deleting action with ID:", id); // Debugging log
+
+      // Call the service to delete action
+      const response = await homeService.deleteActionService(id);
+
+      if (response.success) {
+        return successResponse(res, response.message, response.data || {}, 200); // 200 OK
       } else {
-        return errorResponse(res, response?.message || 'Error occurred', 500); // Internal Server Error
+        return errorResponse(res, response.message, 404); // Not Found
       }
     } catch (error) {
-      next(error); // Pass error to the next middleware (error handler)
+      console.error("Error in deleteActionController:", error);
+      next(error); // Pass error to middleware
     }
   }
 }

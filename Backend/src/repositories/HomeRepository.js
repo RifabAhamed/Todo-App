@@ -1,6 +1,10 @@
+import mongoose from "mongoose";
 import ActionModel from "../../src/models/ActionModel.js";
 
+const { isValidObjectId } = mongoose; // Importing isValidObjectId
+
 class HomeRepository {
+  // Create action repository
   async createActionRepository(dto) {
     try {
       // Check for existing entity
@@ -35,6 +39,7 @@ class HomeRepository {
     }
   }
 
+  // Get all actions repository
   async getAllActionsRepository() {
     try {
       const actions = await ActionModel.find().exec();
@@ -54,69 +59,77 @@ class HomeRepository {
     }
   }
 
-  async updateActionRepository(dto) {
+  // Update action repository
+  async updateActionRepository(id, dto) {
     try {
-      // Find the action by its ID and update it
-      const updatedAction = await ActionModel.findOneAndUpdate(
-        { _id: dto.id }, // Corrected to use _id instead of id
-        {
-          $set: {
-            actionTitle: dto.actionTitle || undefined, // Only update if provided
-            actionDescription: dto.actionDescription || undefined,
-            actionStatus: dto.actionStatus || undefined,
-          },
-        },
-        { new: true } // Return the updated document
-      );
-  
-      if (!updatedAction) {
+      if (!isValidObjectId(id)) {
         return {
           success: false,
-          message: "Action not found or is inactive.",
+          message: "Invalid action ID",
           data: null,
         };
       }
-  
+
+      const updatedAction = await ActionModel.findByIdAndUpdate(
+        id,
+        { $set: dto },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedAction) {
+        return {
+          success: false,
+          message: "Action not found",
+          data: null,
+        };
+      }
+
       return {
         success: true,
-        message: "Action updated successfully.",
+        message: "Action updated successfully",
         data: updatedAction,
       };
     } catch (error) {
-      console.error("Error performing action operation (update):", error, dto);
+      console.error("Error updating action:", error);
       return {
         success: false,
-        message: "Error performing action operation.",
+        message: error.message,
         data: null,
       };
     }
   }
-  
 
+  // Delete action repository
   async deleteActionRepository(id) {
     try {
-      // Attempt to delete the action based on the ID
+      if (!isValidObjectId(id)) {
+        return {
+          success: false,
+          message: "Invalid action ID",
+          data: null,
+        };
+      }
+
       const deletedAction = await ActionModel.findByIdAndDelete(id);
 
-      // Check if the action was found and deleted
       if (!deletedAction) {
         return {
           success: false,
-          message: "Action not found or already deleted.",
+          message: "Action not found",
           data: null,
         };
       }
 
       return {
         success: true,
-        message: "Action deleted successfully.",
+        message: "Action deleted successfully",
         data: deletedAction,
       };
     } catch (error) {
-      console.error("Error performing action operation (delete):", error, id);
+      console.error("Error deleting action:", error);
       return {
         success: false,
-        message: "Error performing action operation.",
+        message: error.message,
         data: null,
       };
     }
