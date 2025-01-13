@@ -25,6 +25,7 @@ const TaskService = () => {
           actionTitle: data.actionTitle || "No Title",
           actionDescription: data.actionDescription || "No Description",
           actionStatus: data.actionStatus || "todo",
+          actionDate: data.actionDate || "",
         }
       );
 
