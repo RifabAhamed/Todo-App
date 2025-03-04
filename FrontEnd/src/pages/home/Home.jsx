@@ -53,6 +53,7 @@ const Home = () => {
     setTask("");
     setDescription("");
     setDate("");
+    form.resetFields(); // Reset Form
   };
 
   const handleDeleteTask = async (taskId) => {
@@ -126,30 +127,35 @@ const Home = () => {
     setLoading(false);
   };
 
-  const handleAddNewTask = async () => {
-    const newTask = {
-      actionTitle: task.trim(),
-      actionDescription: description.trim(),
-      actionDate: date.trim(),
-    };
+const handleAddNewTask = async () => {
+  const formattedDate = date ? new Date(date.trim()).toISOString() : null;
 
-    setLoading(true);
-    setIsModalOpen(false);
-    const response = await addNewTask(newTask);
-
-    if (response.responseType === "success") {
-      setTasks([...tasks, response.output?.data]);
-      setTask("");
-      setDescription("");
-        form.resetFields(); // Reset Form
-        setIsModalOpen(false);
-    } else if (response.responseType === "fail") {
-      console.error("Failed to add task:", response.output);
-    } else if (response.responseType === "error") {
-      console.error("Error adding task:", response.output);
-    }
-    setLoading(false);
+  const newTask = {
+    actionTitle: task.trim(),
+    actionDescription: description.trim(),
+    actionDate: formattedDate, // Convert to UTC format
   };
+
+  console.log("Formatted Date:", formattedDate); // Debugging
+
+  setLoading(true);
+  setIsModalOpen(false);
+  const response = await addNewTask(newTask);
+
+  if (response.responseType === "success") {
+    setTasks([...tasks, response.output?.data]);
+    setTask("");
+    setDescription("");
+    form.resetFields(); // Reset Form
+    setIsModalOpen(false);
+  } else if (response.responseType === "fail") {
+    console.error("Failed to add task:", response.output);
+  } else if (response.responseType === "error") {
+    console.error("Error adding task:", response.output);
+  }
+  setLoading(false);
+};
+
 
   // Function to filter tasks based on status
   const filterTasks = (status) =>
@@ -184,9 +190,7 @@ const Home = () => {
                       <Button onClick={() => handleDeleteTask(task._id)}>
                         Delete
                       </Button>
-                      <div>
-                        {task.actionDate}
-                      </div>
+                      <div>{new Date(task.actionDate).toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
@@ -244,7 +248,7 @@ const Home = () => {
             </div>
           ) : (
             <div>
-              {filterTasks("notDone").map((task, index) => (
+              {filterTasks("not_done").map((task, index) => (
                 <div
                   key={index}
                   className="bg-[#c3d2f7] text-xl w-full h-10 my-1 rounded-md flex items-center px-2 hover:shadow-md"
@@ -271,7 +275,7 @@ const Home = () => {
             className=" h-12 text-2xl font-semibold rounded-xl bg-[#c3d2f7]"
             onClick={showModel}
           >
-            Add a New Task
+            + Add a New Task
           </Button>
         </div>
         <Divider className="my-0" />
