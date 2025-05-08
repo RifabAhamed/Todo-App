@@ -15,20 +15,18 @@ import { useEffect, useState } from "react";
 import TaskService from "../../services/TaskService";
 
 const Home = () => {
-  const { getAllTasks, addNewTask, updateTaskStatus, deleteTask } =
+  const { getAllTasks, addNewTask, updateTaskStatus, deleteTask, updateTask } =
     TaskService();
   const [task, setTask] = useState("");
   const [description, setDescription] = useState("");
-  const[date, setDate] = useState("");
+  const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeKey, setActiveKey] = useState("1");
   const [tasks, setTasks] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
 
-
   const [form] = Form.useForm();
-
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -88,6 +86,62 @@ const Home = () => {
     setLoading(false);
   };
 
+  const editTask = async (taskId) => {
+    setLoading(true);
+    const taskToEdit = tasks.find((task) => task._id === taskId);
+
+    console.log(tasks)
+
+    if (!taskToEdit) {
+      console.error("Task not found");
+      setLoading(false);
+      return;
+    }
+
+    // Open modal and populate fields
+    setIsModalOpen(true);
+    setTask(taskToEdit.actionTitle);
+    setDescription(taskToEdit.actionDescription);
+    setDate(taskToEdit.actionDate);
+
+    console.log(taskToEdit)
+
+    form.setFieldsValue({
+      actionTitle: taskToEdit.actionTitle,
+      actionDescription: taskToEdit.actionDescription,
+      actionDate: taskToEdit.actionDate
+        ? new Date(taskToEdit.actionDate)
+        : null,
+    });
+
+    // Wait for user input and update task when submitted
+    form.submit = async () => {
+      const updatedTask = {
+        actionTitle: task.trim(),
+        actionDescription: description.trim(),
+        actionDate: date ? new Date(date.trim()).toISOString() : null,
+      };
+
+      const response = await updateTask(taskId, updatedTask);
+
+      if (response.responseType === "success") {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task._id === taskId ? { ...task, ...updatedTask } : task
+          )
+        );
+        setIsModalOpen(false);
+        setTask("");
+        setDescription("");
+        setDate("");
+        form.resetFields();
+      } else {
+        console.error("Failed to update task:", response.output);
+      }
+      setLoading(false);
+    };
+  };
+
   const markAsUnDone = async (taskId) => {
     setLoading(true);
     const response = await updateTaskStatus(taskId, "todo");
@@ -127,35 +181,34 @@ const Home = () => {
     setLoading(false);
   };
 
-const handleAddNewTask = async () => {
-  const formattedDate = date ? new Date(date.trim()).toISOString() : null;
+  const handleAddNewTask = async () => {
+    const formattedDate = date ? new Date(date.trim()).toISOString() : null;
 
-  const newTask = {
-    actionTitle: task.trim(),
-    actionDescription: description.trim(),
-    actionDate: formattedDate, // Convert to UTC format
-  };
+    const newTask = {
+      actionTitle: task.trim(),
+      actionDescription: description.trim(),
+      actionDate: formattedDate, // Convert to UTC format
+    };
 
-  console.log("Formatted Date:", formattedDate); // Debugging
+    console.log("Formatted Date:", formattedDate); // Debugging
 
-  setLoading(true);
-  setIsModalOpen(false);
-  const response = await addNewTask(newTask);
-
-  if (response.responseType === "success") {
-    setTasks([...tasks, response.output?.data]);
-    setTask("");
-    setDescription("");
-    form.resetFields(); // Reset Form
+    setLoading(true);
     setIsModalOpen(false);
-  } else if (response.responseType === "fail") {
-    console.error("Failed to add task:", response.output);
-  } else if (response.responseType === "error") {
-    console.error("Error adding task:", response.output);
-  }
-  setLoading(false);
-};
+    const response = await addNewTask(newTask);
 
+    if (response.responseType === "success") {
+      setTasks([...tasks, response.output?.data]);
+      setTask("");
+      setDescription("");
+      form.resetFields(); // Reset Form
+      setIsModalOpen(false);
+    } else if (response.responseType === "fail") {
+      console.error("Failed to add task:", response.output);
+    } else if (response.responseType === "error") {
+      console.error("Error adding task:", response.output);
+    }
+    setLoading(false);
+  };
 
   // Function to filter tasks based on status
   const filterTasks = (status) =>
@@ -184,13 +237,16 @@ const handleAddNewTask = async () => {
                       {task.actionDescription}
                     </div>
                     <div className="flex gap-5">
+                      <div className="w-60">
+                        {new Date(task.actionDate).toLocaleString()}
+                      </div>
                       <Button onClick={() => markAsDone(task._id)}>
                         Mark as Done
                       </Button>
+                      <Button onClick={() => editTask(task._id)}>Edit</Button>
                       <Button onClick={() => handleDeleteTask(task._id)}>
                         Delete
                       </Button>
-                      <div>{new Date(task.actionDate).toLocaleString()}</div>
                     </div>
                   </div>
                 </div>
