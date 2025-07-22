@@ -8,12 +8,12 @@ class HomeService {
     this.repository = new HomeRepository();
   }
 
-  async createActionService(dto) {
+  async createTaskService(dto) {
     try {
-      const response = await this.repository.createActionRepository(dto);
+      const response = await this.repository.createTaskRepository(dto);
       return response;
     } catch (error) {
-      console.error("Error in createActionService:", error); // Improved error logging
+      console.error("Error in createTaskService:", error); // Improved error logging
       return {
         success: false,
         message: error.message,
@@ -22,24 +22,24 @@ class HomeService {
     }
   }
 
-  async getAllActionsService() {
+  async getAllTasksService() {
     try {
-      const response = await this.repository.getAllActionsRepository();
+      const response = await this.repository.getAllTasksRepository();
       if (response.success) {
         return {
           success: true,
-          message: "Actions fetched successfully",
+          message: "Tasks fetched successfully",
           data: response.data || [], // Ensure `data` is always an array
         };
       } else {
         return {
           success: false,
-          message: response.message || "Failed to fetch actions",
+          message: response.message || "Failed to fetch Tasks",
           data: [],
         };
       }
     } catch (error) {
-      console.error("Error in getAllActionsService:", error);
+      console.error("Error in getAllTasksService:", error);
       return {
         success: false,
         message: error.message,
@@ -48,7 +48,7 @@ class HomeService {
     }
   }
 
-  async updateActionService(id, dto) {
+  async updateTaskService(id, dto) {
     try {
       if (!id || !isValidObjectId(id)) {
         return {
@@ -58,22 +58,22 @@ class HomeService {
         };
       }
 
-      const response = await this.repository.updateActionRepository(id, dto);
+      const response = await this.repository.updateTaskRepository(id, dto);
       if (response.success) {
         return {
           success: true,
-          message: "Action updated successfully",
+          message: "Task updated successfully",
           data: response.data,
         };
       } else {
         return {
           success: false,
-          message: "Action not found or failed to update",
+          message: "Task not found or failed to update",
           data: null,
         };
       }
     } catch (error) {
-      console.error("Error in updateActionService:", error);
+      console.error("Error in updateTaskService:", error);
       return {
         success: false,
         message: error.message,
@@ -82,7 +82,7 @@ class HomeService {
     }
   }
 
-  async deleteActionService(id) {
+  async deleteTaskService(id) {
     try {
       if (!id || !isValidObjectId(id)) {
         return {
@@ -92,22 +92,22 @@ class HomeService {
         };
       }
 
-      const response = await this.repository.deleteActionRepository(id);
+      const response = await this.repository.deleteTaskRepository(id);
       if (response.success) {
         return {
           success: true,
-          message: "Action deleted successfully",
+          message: "Task deleted successfully",
           data: response.data || {}, // Return empty object if no data
         };
       } else {
         return {
           success: false,
-          message: "Action not found or failed to delete",
+          message: "Task not found or failed to delete",
           data: null,
         };
       }
     } catch (error) {
-      console.error("Error in deleteActionService:", error);
+      console.error("Error in deleteTaskService:", error);
       return {
         success: false,
         message: error.message,

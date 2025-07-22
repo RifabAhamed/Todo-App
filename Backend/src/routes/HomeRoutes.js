@@ -5,9 +5,9 @@ const router = express.Router();
 const homeController = new HomeController();
 
 
-router.post("/create-action", homeController.createActionController);
-router.get("/get-all-actions", homeController.getAllActionsController);
-router.put("/update-action/", homeController.updateActionController);
-router.delete("/delete-action/", homeController.deleteActionController);
+router.post("/create-task", homeController.createTaskController);
+router.get("/get-all-tasks", homeController.getAllTasksController);
+router.put("/update-task/", homeController.updateTaskController);
+router.delete("/delete-task/", homeController.deleteTaskController);
 
 export default router;

@@ -9,13 +9,11 @@ const dbConfig = async () => {
 
   try {
     await mongoose.connect(mongoUri, {
-      // useNewUrlParser: true,
-      // useUnifiedTopology: true,
     });
     console.log('Connected to MongoDB');
   } catch (err) {
     console.error('Error connecting to MongoDB:', err.message);
-    process.exit(1); // Exit process on connection failure
+    process.exit(1);
   }
 
   mongoose.connection.on('error', (err) => {
