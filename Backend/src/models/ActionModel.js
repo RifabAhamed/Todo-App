@@ -16,11 +16,14 @@ const ActionSchema = new Schema(
       type: String,
       required: true,
       unique: true, // Ensures action titles are unique
-      minlength: [3, 'Action title should be at least 3 characters long'],
       trim: true, // Trims leading/trailing spaces
     },
     actionDescription: {
       type: String,
+      required: false,
+    },
+    actionDate:{
+      type: Date,
       required: false,
     },
     actionStatus: {

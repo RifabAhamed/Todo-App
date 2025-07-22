@@ -2,37 +2,56 @@ import {
   Button,
   ConfigProvider,
   Divider,
+  Form,
   Image,
   Input,
   Modal,
   Skeleton,
   Tabs,
+  DatePicker,
 } from "antd";
 import mainImage from "../../assets/images/mainImage.png";
 import { useEffect, useState } from "react";
 import TaskService from "../../services/TaskService";
+
 const Home = () => {
-  const { getAllTasks, addNewTask, updateTaskStatus, deleteTask } =
+  const { getAllTasks, addNewTask, updateTaskStatus, deleteTask, updateTask } =
     TaskService();
   const [task, setTask] = useState("");
   const [description, setDescription] = useState("");
+  const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeKey, setActiveKey] = useState("1");
   const [tasks, setTasks] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentDateTime, setCurrentDateTime] = useState(new Date());
+
+  const [form] = Form.useForm();
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDateTime(new Date());
+    }, 1000); // Update every second
+
+    return () => clearInterval(timer); // Cleanup the timer
+  }, []);
+
+  const onDateChange = (date, dateString) => {
+    setDate(dateString);
+    console.log(date);
+    console.log(dateString);
+  };
 
   const showModel = () => {
     setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
   };
 
   const handleCancel = () => {
     setIsModalOpen(false);
     setTask("");
     setDescription("");
+    setDate("");
+    form.resetFields(); // Reset Form
   };
 
   const handleDeleteTask = async (taskId) => {
@@ -66,7 +85,63 @@ const Home = () => {
     }
     setLoading(false);
   };
-  
+
+  const editTask = async (taskId) => {
+    setLoading(true);
+    const taskToEdit = tasks.find((task) => task._id === taskId);
+
+    console.log(tasks)
+
+    if (!taskToEdit) {
+      console.error("Task not found");
+      setLoading(false);
+      return;
+    }
+
+    // Open modal and populate fields
+    setIsModalOpen(true);
+    setTask(taskToEdit.actionTitle);
+    setDescription(taskToEdit.actionDescription);
+    setDate(taskToEdit.actionDate);
+
+    console.log(taskToEdit)
+
+    form.setFieldsValue({
+      actionTitle: taskToEdit.actionTitle,
+      actionDescription: taskToEdit.actionDescription,
+      actionDate: taskToEdit.actionDate
+        ? new Date(taskToEdit.actionDate)
+        : null,
+    });
+
+    // Wait for user input and update task when submitted
+    form.submit = async () => {
+      const updatedTask = {
+        actionTitle: task.trim(),
+        actionDescription: description.trim(),
+        actionDate: date ? new Date(date.trim()).toISOString() : null,
+      };
+
+      const response = await updateTask(taskId, updatedTask);
+
+      if (response.responseType === "success") {
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task._id === taskId ? { ...task, ...updatedTask } : task
+          )
+        );
+        setIsModalOpen(false);
+        setTask("");
+        setDescription("");
+        setDate("");
+        form.resetFields();
+      } else {
+        console.error("Failed to update task:", response.output);
+      }
+      setLoading(false);
+    };
+  };
+
   const markAsUnDone = async (taskId) => {
     setLoading(true);
     const response = await updateTaskStatus(taskId, "todo");
@@ -106,32 +181,34 @@ const Home = () => {
     setLoading(false);
   };
 
-const handleAddNewTask = async () => {
-  if (!task.trim() || !description.trim()) {
-    console.error("Task title and description cannot be empty.");
-    return;
-  }
+  const handleAddNewTask = async () => {
+    const formattedDate = date ? new Date(date.trim()).toISOString() : null;
 
-  const newTask = {
-    actionTitle: task.trim(),
-    actionDescription: description.trim(),
+    const newTask = {
+      actionTitle: task.trim(),
+      actionDescription: description.trim(),
+      actionDate: formattedDate, // Convert to UTC format
+    };
+
+    console.log("Formatted Date:", formattedDate); // Debugging
+
+    setLoading(true);
+    setIsModalOpen(false);
+    const response = await addNewTask(newTask);
+
+    if (response.responseType === "success") {
+      setTasks([...tasks, response.output?.data]);
+      setTask("");
+      setDescription("");
+      form.resetFields(); // Reset Form
+      setIsModalOpen(false);
+    } else if (response.responseType === "fail") {
+      console.error("Failed to add task:", response.output);
+    } else if (response.responseType === "error") {
+      console.error("Error adding task:", response.output);
+    }
+    setLoading(false);
   };
-
-  setLoading(true);
-  setIsModalOpen(false);
-  const response = await addNewTask(newTask);
-
-  if (response.responseType === "success") {
-    setTasks([...tasks, response.output?.data]);
-    setTask("");
-    setDescription("");
-  } else if (response.responseType === "fail") {
-    console.error("Failed to add task:", response.output);
-  } else if (response.responseType === "error") {
-    console.error("Error adding task:", response.output);
-  }
-  setLoading(false);
-};
 
   // Function to filter tasks based on status
   const filterTasks = (status) =>
@@ -159,10 +236,14 @@ const handleAddNewTask = async () => {
                     <div className="text-sm w-[30%]">
                       {task.actionDescription}
                     </div>
-                    <div>
+                    <div className="flex gap-5">
+                      <div className="w-60">
+                        {new Date(task.actionDate).toLocaleString()}
+                      </div>
                       <Button onClick={() => markAsDone(task._id)}>
                         Mark as Done
                       </Button>
+                      <Button onClick={() => editTask(task._id)}>Edit</Button>
                       <Button onClick={() => handleDeleteTask(task._id)}>
                         Delete
                       </Button>
@@ -223,7 +304,7 @@ const handleAddNewTask = async () => {
             </div>
           ) : (
             <div>
-              {filterTasks("notDone").map((task, index) => (
+              {filterTasks("not_done").map((task, index) => (
                 <div
                   key={index}
                   className="bg-[#c3d2f7] text-xl w-full h-10 my-1 rounded-md flex items-center px-2 hover:shadow-md"
@@ -250,7 +331,7 @@ const handleAddNewTask = async () => {
             className=" h-12 text-2xl font-semibold rounded-xl bg-[#c3d2f7]"
             onClick={showModel}
           >
-            Add a New Task
+            + Add a New Task
           </Button>
         </div>
         <Divider className="my-0" />
@@ -281,34 +362,102 @@ const handleAddNewTask = async () => {
       <Modal
         title="Add New Task"
         open={isModalOpen}
-        onOk={handleOk}
         onCancel={handleCancel}
         footer={null}
       >
         <div className="flex flex-col w-full gap-10">
           <div className="flex flex-col w-full gap-2">
-            <div>Title:</div>
-            <Input
-              placeholder="Add new task"
-              size="large"
-              value={task}
-              onChange={(e) => {
-                setTask(e.target.value);
-              }}
-            />
-            <div>Description:</div>
-            <Input
-              placeholder="Add new task"
-              size="large"
-              value={description}
-              onChange={(e) => {
-                setDescription(e.target.value);
-              }}
-            />
+            <Form
+              form={form}
+              layout="vertical"
+              initialValues={{ title: task, description: description }}
+              onFinish={handleAddNewTask}
+            >
+              <div className="flex">
+                <div>Current Date:</div>
+                <div>{currentDateTime.toLocaleDateString()} </div>
+              </div>
+              <div className="flex mb-5">
+                <div>Current Time:</div>
+                <div>{currentDateTime.toLocaleTimeString()} </div>
+              </div>
+              <Form.Item
+                label="Title"
+                name="title"
+                rules={[
+                  {
+                    required: true,
+                    message: "Please input the task title!",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Add new task"
+                  size="large"
+                  value={task}
+                  onChange={(e) => {
+                    setTask(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Description"
+                name="description"
+                rules={[
+                  {
+                    required: false,
+                    message: "Please input the task description!",
+                  },
+                ]}
+              >
+                <Input
+                  placeholder="Add new task"
+                  size="large"
+                  value={description}
+                  onChange={(e) => {
+                    setDescription(e.target.value);
+                  }}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Date"
+                name="date"
+                className="w-full"
+                rules={[
+                  {
+                    required: false,
+                    message: "Please input the task date!",
+                  },
+                ]}
+              >
+                <DatePicker
+                  size="large"
+                  className="w-full"
+                  // locale={{
+                  //   dateTimeFormat: "YYYY-MM-DD HH:mm",
+                  // }}
+                  showTime
+                  onChange={onDateChange}
+                />
+              </Form.Item>
+              <Form.Item />
+
+              <Form.Item>
+                <div className="flex justify-end">
+                  <Button
+                    type="default"
+                    onClick={handleCancel}
+                    style={{ marginRight: "10px" }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="primary" htmlType="submit">
+                    Add Task
+                  </Button>
+                </div>
+              </Form.Item>
+            </Form>
           </div>
-          <Button type="primary" onClick={handleAddNewTask}>
-            Add Task
-          </Button>
         </div>
       </Modal>
     </div>
