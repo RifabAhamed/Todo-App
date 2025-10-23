@@ -1,29 +1,26 @@
 import cron from "node-cron";
-import ActionModel, { ActionStatus } from "../models/ActionModel.js";
+import TaskModel, { TaskStatus } from "../models/taskModel.js";
 
-const updateActionStatuses = () => {
-  // Run daily at midnight
+const updateTaskStatuses = () => {
   cron.schedule("*/1 * * * *", async () => {
     try {
       const now = new Date();
 
-      await ActionModel.updateMany(
+      await TaskModel.updateMany(
         {
-          actionDate: { $lt: now },
-          actionStatus: ActionStatus.TODO,
+          taskDate: { $lt: now },
+          taskStatus: TaskStatus.TODO,
         },
         {
-          $set: { actionStatus: ActionStatus.NOT_DONE },
+          $set: { taskStatus: TaskStatus.NOT_DONE },
         }
       );
 
-      console.log(
-        `[CRON] Actions updated to 'not_done' at ${now.toISOString()}`
-      );
+      console.log(`[CRON] Task updated to 'not_done' at ${now.toISOString()}`);
     } catch (error) {
-      console.error("Error updating actions:", error);
+      console.error("Error updating task:", error);
     }
   });
 };
 
-export default updateActionStatuses;
+export default updateTaskStatuses;

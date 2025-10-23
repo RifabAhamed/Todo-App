@@ -100,26 +100,26 @@ const Home = () => {
 
     // Open modal and populate fields
     setIsModalOpen(true);
-    setTask(taskToEdit.actionTitle);
-    setDescription(taskToEdit.actionDescription);
-    setDate(taskToEdit.actionDate);
+    setTask(taskToEdit.taskTitle);
+    setDescription(taskToEdit.taskDescription);
+    setDate(taskToEdit.taskDate);
 
     console.log(taskToEdit)
 
     form.setFieldsValue({
-      actionTitle: taskToEdit.actionTitle,
-      actionDescription: taskToEdit.actionDescription,
-      actionDate: taskToEdit.actionDate
-        ? new Date(taskToEdit.actionDate)
+      taskTitle: taskToEdit.taskTitle,
+      taskDescription: taskToEdit.taskDescription,
+      taskDate: taskToEdit.taskDate
+        ? new Date(taskToEdit.taskDate)
         : null,
     });
 
     // Wait for user input and update task when submitted
     form.submit = async () => {
       const updatedTask = {
-        actionTitle: task.trim(),
-        actionDescription: description.trim(),
-        actionDate: date ? new Date(date.trim()).toISOString() : null,
+        taskTitle: task.trim(),
+        taskDescription: description.trim(),
+        taskDate: date ? new Date(date.trim()).toISOString() : null,
       };
 
       const response = await updateTask(taskId, updatedTask);
@@ -185,9 +185,9 @@ const Home = () => {
     const formattedDate = date ? new Date(date.trim()).toISOString() : null;
 
     const newTask = {
-      actionTitle: task.trim(),
-      actionDescription: description.trim(),
-      actionDate: formattedDate, // Convert to UTC format
+      taskTitle: task.trim(),
+      taskDescription: description.trim(),
+      taskDate: formattedDate, // Convert to UTC format
     };
 
     console.log("Formatted Date:", formattedDate); // Debugging
@@ -212,7 +212,7 @@ const Home = () => {
 
   // Function to filter tasks based on status
   const filterTasks = (status) =>
-    tasks.filter((task) => task.actionStatus === status);
+    tasks.filter((task) => task.taskStatus === status);
 
   const tabItems = [
     {
@@ -232,13 +232,13 @@ const Home = () => {
                   className="bg-[#c3d2f7] text-xl w-full h-10 my-1 rounded-md flex items-center px-2 hover:shadow-md"
                 >
                   <div className="flex gap-20 w-full">
-                    <div className="w-[20%]">{task.actionTitle}</div>
+                    <div className="w-[20%]">{task.taskTitle}</div>
                     <div className="text-sm w-[30%]">
-                      {task.actionDescription}
+                      {task.taskDescription}
                     </div>
                     <div className="flex gap-5">
                       <div className="w-60">
-                        {new Date(task.actionDate).toLocaleString()}
+                        {new Date(task.taskDate).toLocaleString()}
                       </div>
                       <Button onClick={() => markAsDone(task._id)}>
                         Mark as Done
@@ -273,9 +273,9 @@ const Home = () => {
                   className="bg-[#c3d2f7] text-xl w-full h-10 my-1 rounded-md flex items-center px-2 hover:shadow-md"
                 >
                   <div className="flex gap-20 w-full">
-                    <div className="w-[20%]">{task.actionTitle}</div>
+                    <div className="w-[20%]">{task.taskTitle}</div>
                     <div className="text-sm w-[30%]">
-                      {task.actionDescription}
+                      {task.taskDescription}
                     </div>
                     <div>
                       <Button onClick={() => markAsUnDone(task._id)}>
@@ -309,8 +309,8 @@ const Home = () => {
                   key={index}
                   className="bg-[#c3d2f7] text-xl w-full h-10 my-1 rounded-md flex items-center px-2 hover:shadow-md"
                 >
-                  {task.actionTitle}
-                  {task.actionDescription}
+                  {task.taskTitle}
+                  {task.taskDescription}
                 </div>
               ))}
             </div>

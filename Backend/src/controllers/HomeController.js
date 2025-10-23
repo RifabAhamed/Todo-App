@@ -6,11 +6,11 @@ const { isValidObjectId } = mongoose; // Importing isValidObjectId
 const homeService = new HomeService();
 
 class HomeController {
-  // Create Action
-  async createActionController(req, res, next) {
+  // Create Task
+  async createTaskController(req, res, next) {
     try {
       const dto = req.body;
-      const response = await homeService.createActionService(dto);
+      const response = await homeService.createTaskService(dto);
 
       if (response && response.success) {
         return successResponse(res, response.message, response.data, 201); // 201 Created
@@ -18,15 +18,15 @@ class HomeController {
         return errorResponse(res, response.message, 500); // Internal Server Error
       }
     } catch (error) {
-      console.error("Error in createActionController:", error);
+      console.error("Error in createTaskController:", error);
       next(error); // Pass error to middleware
     }
   }
 
-  // Get All Actions
-  async getAllActionsController(req, res, next) {
+  // Get All Tasks
+  async getAllTasksController(req, res, next) {
     try {
-      const response = await homeService.getAllActionsService();
+      const response = await homeService.getAllTasksService();
 
       if (response.success) {
         return successResponse(res, response.message, response.data, 200); // 200 OK
@@ -34,25 +34,25 @@ class HomeController {
         return errorResponse(res, response.message, 500); // Internal Server Error
       }
     } catch (error) {
-      console.error("Error in getAllActionsController:", error);
+      console.error("Error in getAllTasksController:", error);
       next(error); // Pass error to middleware
     }
   }
 
-  // Update Action
-  async updateActionController(req, res, next) {
+  // Update Task
+  async updateTaskController(req, res, next) {
     try {
       const { id } = req.body; // Extract ID from the URL
       if (!isValidObjectId(id)) {
-        return errorResponse(res, "Invalid action ID", 400); // Bad Request
+        return errorResponse(res, "Invalid Task ID", 400); // Bad Request
       }
 
       const dto = req.body; // Extract data to update from the request body
-      console.log("Updating action with ID:", id); // Debugging log
+      console.log("Updating Task with ID:", id); // Debugging log
       console.log("Received data:", dto); // Debugging log
 
-      // Call the service to update action
-      const response = await homeService.updateActionService(id, dto);
+      // Call the service to update Task
+      const response = await homeService.updateTaskService(id, dto);
 
       if (response.success) {
         return successResponse(res, response.message, response.data, 200); // 200 OK
@@ -60,23 +60,23 @@ class HomeController {
         return errorResponse(res, response.message, 500); // Internal Server Error
       }
     } catch (error) {
-      console.error("Error in updateActionController:", error);
+      console.error("Error in updateTaskController:", error);
       next(error); // Pass error to middleware
     }
   }
 
-  // Delete Action
-  async deleteActionController(req, res) {
+  // Delete Task
+  async deleteTaskController(req, res) {
     try {
-     const { id } = req.query;
+      const { id } = req.query;
       if (!isValidObjectId(id)) {
-        return errorResponse(res, "Invalid action ID", 400); // Bad Request
+        return errorResponse(res, "Invalid Task ID", 400); // Bad Request
       }
 
-      console.log("Deleting action with ID:", id); // Debugging log
+      console.log("Deleting Task with ID:", id); // Debugging log
 
-      // Call the service to delete action
-      const response = await homeService.deleteActionService(id);
+      // Call the service to delete Task
+      const response = await homeService.deleteTaskService(id);
 
       if (response.success) {
         return successResponse(res, response.message, response.data || {}, 200); // 200 OK
@@ -84,7 +84,7 @@ class HomeController {
         return errorResponse(res, response.message, 404); // Not Found
       }
     } catch (error) {
-      console.error("Error in deleteActionController:", error);
+      console.error("Error in deleteTaskController:", error);
       next(error); // Pass error to middleware
     }
   }

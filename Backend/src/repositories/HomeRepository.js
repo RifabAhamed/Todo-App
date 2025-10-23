@@ -1,56 +1,56 @@
 import mongoose from "mongoose";
-import ActionModel from "../../src/models/ActionModel.js";
+import TaskModel from "../../src/models/TaskModel.js";
 
 const { isValidObjectId } = mongoose; // Importing isValidObjectId
 
 class HomeRepository {
-  // Create action repository
-  async createActionRepository(dto) {
+  // Create task repository
+  async createTaskRepository(dto) {
     try {
       // Check for existing entity
-      const existingEntity = await ActionModel.findOne({
-        actionTitle: dto.actionTitle,
+      const existingEntity = await TaskModel.findOne({
+        taskTitle: dto.taskTitle,
       });
 
       if (existingEntity) {
         return {
           success: false,
-          message: "Action already exists.",
+          message: "Task already exists.",
           data: null,
         };
       }
 
       // Create and save the new entity
-      const newEntity = new ActionModel(dto);
+      const newEntity = new TaskModel(dto);
       const createdEntity = await newEntity.save();
 
       return {
         success: true,
-        message: "Action created.",
+        message: "Task created.",
         data: createdEntity,
       };
     } catch (error) {
-      console.error("Error performing action operation (create):", error, dto);
+      console.error("Error performing Task operation (create):", error, dto);
       return {
         success: false,
-        message: "Error performing action operation.",
+        message: "Error performing Task operation.",
         data: null,
       };
     }
   }
 
-  // Get all actions repository
-  async getAllActionsRepository() {
+  // Get all tasks repository
+  async getAllTasksRepository() {
     try {
-      const actions = await ActionModel.find().exec();
+      const tasks = await TaskModel.find().exec();
 
       return {
         success: true,
-        message: "Actions fetched successfully.",
-        data: actions,
+        message: "Task fetched successfully.",
+        data: tasks,
       };
     } catch (error) {
-      console.error("Error performing action operation (fetch all):", error);
+      console.error("Error performing Task operation (fetch all):", error);
       return {
         success: false,
         message: error.message,
@@ -59,38 +59,38 @@ class HomeRepository {
     }
   }
 
-  // Update action repository
-  async updateActionRepository(id, dto) {
+  // Update task repository
+  async updateTaskRepository(id, dto) {
     try {
       if (!isValidObjectId(id)) {
         return {
           success: false,
-          message: "Invalid action ID",
+          message: "Invalid task ID",
           data: null,
         };
       }
 
-      const updatedAction = await ActionModel.findByIdAndUpdate(
+      const updatedTask = await TaskModel.findByIdAndUpdate(
         id,
         { $set: dto },
         { new: true, runValidators: true }
       );
 
-      if (!updatedAction) {
+      if (!updatedTask) {
         return {
           success: false,
-          message: "Action not found",
+          message: "Task not found",
           data: null,
         };
       }
 
       return {
         success: true,
-        message: "Action updated successfully",
-        data: updatedAction,
+        message: "Task updated successfully",
+        data: updatedTask,
       };
     } catch (error) {
-      console.error("Error updating action:", error);
+      console.error("Error updating Task:", error);
       return {
         success: false,
         message: error.message,
@@ -99,34 +99,34 @@ class HomeRepository {
     }
   }
 
-  // Delete action repository
-  async deleteActionRepository(id) {
+  // Delete task repository
+  async deleteTaskRepository(id) {
     try {
       if (!isValidObjectId(id)) {
         return {
           success: false,
-          message: "Invalid action ID",
+          message: "Invalid task ID",
           data: null,
         };
       }
 
-      const deletedAction = await ActionModel.findByIdAndDelete(id);
+      const deletedTask = await TaskModel.findByIdAndDelete(id);
 
-      if (!deletedAction) {
+      if (!deletedTask) {
         return {
           success: false,
-          message: "Action not found",
+          message: "Task not found",
           data: null,
         };
       }
 
       return {
         success: true,
-        message: "Action deleted successfully",
-        data: deletedAction,
+        message: "Task deleted successfully",
+        data: deletedATask,
       };
     } catch (error) {
-      console.error("Error deleting action:", error);
+      console.error("Error deleting Task:", error);
       return {
         success: false,
         message: error.message,

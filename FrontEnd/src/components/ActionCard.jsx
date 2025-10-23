@@ -1,11 +1,11 @@
 
-const ActionCard = (title, description) => {
+const TaskCard = (title, description) => {
   return (
     <div>
-        <div>{title}</div>
-        <div>{description}</div>
+      <div>{title}</div>
+      <div>{description}</div>
     </div>
-  )
-}
+  );
+};
 
-export default ActionCard
+export default TaskCard;

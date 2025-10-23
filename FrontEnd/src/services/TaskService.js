@@ -4,7 +4,7 @@ const TaskService = () => {
   const getAllTasks = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/home/get-all-actions"
+        "http://localhost:8000/home/get-all-tasks"
       );
 
       if (response?.data?.success) {
@@ -20,12 +20,12 @@ const TaskService = () => {
   const addNewTask = async (data) => {
     try {
       const response = await axios.post(
-        "http://localhost:8000/home/create-action",
+        "http://localhost:8000/home/create-task",
         {
-          actionTitle: data.actionTitle || "No Title",
-          actionDescription: data.actionDescription || "No Description",
-          actionStatus: data.actionStatus || "todo",
-          actionDate: data.actionDate || "",
+          taskTitle: data.taskTitle || "No Title",
+          taskDescription: data.taskDescription || "No Description",
+          taskStatus: data.taskStatus || "todo",
+          taskDate: data.taskDate || "",
         }
       );
 
@@ -42,10 +42,10 @@ const TaskService = () => {
   const updateTaskStatus = async (id, newStatus) => {
     try {
       const response = await axios.put(
-        "http://localhost:8000/home/update-action",
+        "http://localhost:8000/home/update-task",
         {
           id,
-          actionStatus: newStatus,
+          taskStatus: newStatus,
         }
       );
 
@@ -61,12 +61,12 @@ const TaskService = () => {
   const updateTask = async (id, data) => {
     try {
       const response = await axios.put(
-        "http://localhost:8000/home/update-action",
+        "http://localhost:8000/home/update-task",
         {
           id,
-          actionTitle: data.actionTitle,
-          actionDescription: data.actionDescription,
-          actionDate: data.actionDate
+          taskTitle: data.taskTitle,
+          taskDescription: data.taskDescription,
+          taskDate: data.taskDate
         }
       );
 
@@ -83,7 +83,7 @@ const TaskService = () => {
   const deleteTask = async (id) => {
     try {
       const response = await axios.delete(
-        `http://localhost:8000/home/delete-action`,
+        `http://localhost:8000/home/delete-task`,
         {
           params: { id }, // Pass id as a query parameter
         }
