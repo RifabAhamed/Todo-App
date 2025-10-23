@@ -1,6 +1,3 @@
-Here is the raw Markdown code for the `README.md` file:
-
-```markdown
 # Todo-App
 
 A simple, clean, and efficient full-stack To-Do List Application. This app features a modern React frontend and a robust Node.js backend, allowing you to add, view, and manage your to-do items with data persistence.
@@ -190,7 +187,7 @@ cd Todo-App
 
 1. **Build Frontend:**
 
-````
+```
 
 cd todo-app
 npm run build
@@ -259,4 +256,3 @@ Feel free to open issues for bug reports, feature requests, or any questions.
 Thanks for exploring this project. Happy coding! 🎉
 
 *Last updated: 2025-10-23*
-```
